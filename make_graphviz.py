@@ -60,7 +60,8 @@ for object in j:
                         try:
                             node.children.add(obj_map[child["ptr"]])
                         except KeyError:
-                            print("Missing address", child["ptr"])
+                            if child["type"] != "romdata":  # romdata not in garbage collector
+                                print("Missing address", child["ptr"])
                 elif isinstance(child, str):
                     node.children.add(Node({"ptr": child}))  # jesus fuck
 
