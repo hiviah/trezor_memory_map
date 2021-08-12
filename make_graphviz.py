@@ -25,6 +25,23 @@ class Node:
             return hash(self.object["ptr"])
 
 
+def get_global_node(child):
+    """Return a node object existing or new for a child object"""
+    if isinstance(child, dict):
+        if child["ptr"] == "(nil)":
+            return Node(child)
+        else:
+            try:
+                return obj_map[child["ptr"]]
+            except KeyError:
+                if child["type"] != "romdata":  # romdata not in garbage collector
+                    print("Missing address", child["ptr"])
+    elif isinstance(child, str):
+        return Node({"ptr": child})  # jesus fuck
+
+    return None
+
+
 with open(sys.argv[1]) as f:
     j = json.load(f)
 
@@ -46,24 +63,25 @@ for object in j:
         continue
     addr = object.get("ptr", "(nil)")
     if addr != "(nil)":
-        node = obj_map[addr]  # do not create again, lookup existing
+        node = obj_map.get(addr)  # do not create again, lookup existing
         children = object.get("children")  # need to do recursively?
+        child_nodes = set()
         if children:
-            pass
+            for child in children:
+                key_node = get_global_node(child["key"])
+                if key_node is not None:
+                    child_nodes.add(key_node)
+                    value_node = get_global_node(child["key"])
+                    if value_node is not None:
+                        child_nodes.add(value_node)
         elif object.get("items"):
             children = object.get("items")
             for child in children:
-                if isinstance(child, dict):
-                    if child["ptr"] == "(nil)":
-                        node.children.add(Node(child))
-                    else:
-                        try:
-                            node.children.add(obj_map[child["ptr"]])
-                        except KeyError:
-                            if child["type"] != "romdata":  # romdata not in garbage collector
-                                print("Missing address", child["ptr"])
-                elif isinstance(child, str):
-                    node.children.add(Node({"ptr": child}))  # jesus fuck
+                item_node = get_global_node(child)
+                if node is not None:
+                    child_nodes.add(item_node)
+
+        node.children.update(child_nodes)
 
 
 for obj in j:
