@@ -114,6 +114,7 @@ for addr, node in obj_map.items():
         print(children_count, addr, node)
 
 dot_graph = AGraph(directed=True)
+dot_graph.node_attr.update(shape="rectangle", style="filled")
 
 some_nodes = [node for node in obj_map.values() if len(node.children) > 5]
 some_nodes = some_nodes[:20]
