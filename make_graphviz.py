@@ -127,6 +127,6 @@ for idx, node in enumerate(some_nodes):
         dot_graph.add_edge(node.graph_id, child.graph_id)
 
 dot_graph.write("tjost.dot")
-dot_graph.draw("tjost.png", prog="circo")
+#dot_graph.draw("tjost.png", prog="circo")
 
 print("Done")
