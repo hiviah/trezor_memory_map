@@ -3,6 +3,8 @@
 import sys
 import json
 
+from pygraphviz import AGraph
+
 class Node:
 
     def __init__(self, object):
@@ -96,5 +98,20 @@ for addr, node in obj_map.items():
     children_count = len(node.children)
     if children_count >= 1:
         print(children_count, addr, node)
+
+dot_graph = AGraph(directed=True)
+
+some_nodes = [node for node in obj_map.values() if len(node.children) > 5]
+for idx, node in enumerate(some_nodes):
+    dot_graph.add_node(node.object["ptr"])
+    for child in (child for child in node.children if child is not None and child.object["ptr"] != "(nil)"):
+        dot_graph.add_node(child.object["ptr"])
+
+for idx, node in enumerate(some_nodes):
+    for child in (child for child in node.children if child is not None and child.object["ptr"] != "(nil)"):
+        dot_graph.add_edge(node.object["ptr"], child.object["ptr"])
+
+dot_graph.write("tjost.dot")
+dot_graph.draw("tjost.png", prog="circo")
 
 print("Done")
