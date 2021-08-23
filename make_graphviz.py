@@ -5,11 +5,16 @@ import json
 
 from pygraphviz import AGraph
 
+# global counter for making keys for nil nodes
+node_idx = 0
+
+
 class Node:
 
     def __init__(self, object):
         self.object = object
         self.children = set()
+        self.synthetic_id = None  # made up identifier for nil nodes
 
     def __str__(self):
         return "Node(%s, %d children)" % (self.object["ptr"], len(self.children))
@@ -36,9 +41,18 @@ class Node:
     @property
     def graph_id(self):
         if self.is_nil():
-            return str(self.object)
+            if self.synthetic_id is None:
+                self.synthetic_id = "%s-%d" % (self.object["type"], self.get_new_node_num())
+            return self.synthetic_id
         else:
             return self.address
+
+    @staticmethod
+    def get_new_node_num():
+        global node_idx
+        node_idx += 1
+        return node_idx
+
 
 
 def get_global_node(child):
