@@ -17,7 +17,7 @@ class Node:
         self.synthetic_id = None  # made up identifier for nil nodes
 
     def __str__(self):
-        return "Node(%s, %d children)" % (self.object["ptr"], len(self.children))
+        return "Node(%s, type %s, %d children)" % (self.object["ptr"], self.object["type"], len(self.children))
 
     def __eq__(self, other):
         if self.is_nil():
@@ -130,11 +130,12 @@ for addr, node in obj_map.items():
 dot_graph = AGraph(directed=True)
 dot_graph.node_attr.update(shape="rectangle", style="filled")
 
-some_nodes = obj_map.values() #[node for node in obj_map.values() if len(node.children) > 5]
+some_nodes = [node for node in obj_map.values() if len(node.children) > 0]
 # some_nodes = some_nodes[:20]
 for idx, node in enumerate(some_nodes):
     dot_graph.add_node(node.graph_id,
-        label=node.object["type"]+" "+node.object["ptr"] + "\\n" + "%d chld" % len(node.children),
+        label=node.object["type"]+" "+node.object["ptr"] + "\\n" + "%d chld" % len(node.children) +
+            "\\n%d alloc" % node.object["alloc"],
         fillcolor="0.529 0.19 %.3f" % (1-min(len(node.children)/50.0, 0.5))
        )
     for child in (child for child in node.children if not child.is_nil()): #node.children:
@@ -145,6 +146,11 @@ for idx, node in enumerate(some_nodes):
         dot_graph.add_edge(node.graph_id, child.graph_id)
 
 dot_graph.write("tjost.dot")
-#dot_graph.draw("tjost.png", prog="circo")
+#dot_graph.draw("tjost.png", prog="fdp")
+
+nodes = list(obj_map.values())
+nodes.sort(key=lambda n:n.object["alloc"])
+for n in nodes:
+    print(n.object["alloc"], n)
 
 print("Done")
