@@ -133,7 +133,10 @@ dot_graph.node_attr.update(shape="rectangle", style="filled")
 some_nodes = obj_map.values() #[node for node in obj_map.values() if len(node.children) > 5]
 # some_nodes = some_nodes[:20]
 for idx, node in enumerate(some_nodes):
-    dot_graph.add_node(node.graph_id, label=node.object["type"]+" "+node.object["ptr"])
+    dot_graph.add_node(node.graph_id,
+        label=node.object["type"]+" "+node.object["ptr"] + "\\n" + "%d chld" % len(node.children),
+        fillcolor="0.529 0.19 %.3f" % (1-min(len(node.children)/50.0, 0.5))
+       )
     for child in (child for child in node.children if not child.is_nil()): #node.children:
         dot_graph.add_node(child.graph_id)
 
