@@ -2,6 +2,7 @@
 
 import sys
 import json
+import math
 
 from pygraphviz import AGraph
 
@@ -142,10 +143,10 @@ for idx, node in enumerate(some_nodes):
         label=node.object["type"]+" "+node.object["ptr"] + "\\n" + "%d chld" % len(node.children) +
             "\\n%d alloc" % node.object["alloc"] +
               ("\\n%s" % node.object["shortval"] if node.object["shortval"] else ""),
-        fillcolor="0.529 %.3f %.3f" % (1-min(0.16+node.object["alloc"]/400.0, 1),
+        fillcolor="%.3f 0.19 %.3f" % (max(0.529-math.log2(node.object["alloc"]+1)/20.0, 0),
             1-min(len(node.children)/50.0, 0.5))
        )
-    for child in (child for child in node.children if not child.is_nil()): #node.children:
+    for child in (child for child in node.children if (not child.is_nil() or len(child.children) > 0)): #node.children:
         dot_graph.add_node(child.graph_id)
 
 for idx, node in enumerate(some_nodes):
