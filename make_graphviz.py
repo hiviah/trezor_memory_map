@@ -129,7 +129,9 @@ for object in j:
             function_node = get_global_node(object.get("function"))
             child_nodes.add(function_node)
 
-
+        # missing:
+        # closed list from closures
+        # parents - not found (in romdata?)
 
 
         node.children.update(child_nodes)
