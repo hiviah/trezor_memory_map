@@ -119,6 +119,9 @@ for object in j:
                 item_node = get_global_node(child)
                 if item_node is not None:
                     child_nodes.add(item_node)
+        elif object.get("globals"):
+            globals_node = get_global_node(object.get("globals"))
+            child_nodes.add(globals_node)
 
         node.children.update(child_nodes)
 
