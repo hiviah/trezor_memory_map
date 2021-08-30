@@ -122,6 +122,15 @@ for object in j:
         elif object.get("globals"):
             globals_node = get_global_node(object.get("globals"))
             child_nodes.add(globals_node)
+        elif object.get("locals"):
+            locals_node = get_global_node(object.get("locals"))
+            child_nodes.add(locals_node)
+        elif object.get("function"):
+            function_node = get_global_node(object.get("function"))
+            child_nodes.add(function_node)
+
+
+
 
         node.children.update(child_nodes)
 
