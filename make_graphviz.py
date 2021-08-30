@@ -68,7 +68,15 @@ def get_global_node(child):
                 if child["type"] != "romdata":  # romdata not in garbage collector
                     print("Missing address", child["ptr"])
     elif isinstance(child, str):
-        return Node({"ptr": child})  # jesus fuck
+        # indirect by address - seen in dict values
+        try:
+            return obj_map[child]  # let's hope addr is in the global map
+        except KeyError:
+            print("Unmapped node - ", child)
+            return Node({
+                "ptr": child,
+                "type": "unmapped"
+            })
 
     return None
 
@@ -102,9 +110,9 @@ for object in j:
                 key_node = get_global_node(child["key"])
                 if key_node is not None:
                     child_nodes.add(key_node)
-                    value_node = get_global_node(child["key"])
-                    if value_node is not None:
-                        child_nodes.add(value_node)
+                value_node = get_global_node(child["value"])
+                if value_node is not None:
+                    child_nodes.add(value_node)
         elif object.get("items"):
             children = object.get("items")
             for child in children:
@@ -137,6 +145,7 @@ dot_graph.node_attr.update(shape="rectangle", style="filled")
 
 some_nodes = [node for node in obj_map.values() if len(node.children) >= 0] #and node.object["type"] != "function"]
 # some_nodes = some_nodes[:20]
+
 for idx, node in enumerate(some_nodes):
     dot_graph.add_node(node.graph_id,
         URL=node.graph_id,
@@ -161,4 +170,4 @@ nodes.sort(key=lambda n:n.object["alloc"])
 for n in nodes:
     print(n.object["alloc"], n)
 
-print("Done")
+print("Done, number of nodes: %d, number of edges: %d" % (dot_graph.number_of_nodes(), dot_graph.number_of_edges()))
