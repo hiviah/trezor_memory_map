@@ -120,7 +120,11 @@ for obj in j:
     owner = obj.get("owner")
     if owner is not None:
         owner_node = obj_map[owner]
-        owner_node.children.add(owner_node)
+        if obj.get("ptr") != "(nil)":
+            this_child_node = obj_map[obj["ptr"]]
+            owner_node.children.add(this_child_node)
+        else:
+            print("Nil node with owner:", obj)
 
 for addr, node in obj_map.items():
     children_count = len(node.children)
@@ -130,12 +134,14 @@ for addr, node in obj_map.items():
 dot_graph = AGraph(directed=True)
 dot_graph.node_attr.update(shape="rectangle", style="filled")
 
-some_nodes = [node for node in obj_map.values() if len(node.children) >= 0]
+some_nodes = [node for node in obj_map.values() if len(node.children) >= 0] #and node.object["type"] != "function"]
 # some_nodes = some_nodes[:20]
 for idx, node in enumerate(some_nodes):
     dot_graph.add_node(node.graph_id,
+        URL=node.graph_id,
         label=node.object["type"]+" "+node.object["ptr"] + "\\n" + "%d chld" % len(node.children) +
-            "\\n%d alloc" % node.object["alloc"],
+            "\\n%d alloc" % node.object["alloc"] +
+              ("\\n%s" % node.object["shortval"] if node.object["shortval"] else ""),
         fillcolor="0.529 %.3f %.3f" % (1-min(0.16+node.object["alloc"]/400.0, 1),
             1-min(len(node.children)/50.0, 0.5))
        )
