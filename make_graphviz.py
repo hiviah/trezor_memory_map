@@ -112,6 +112,8 @@ for object in j:
                     child_nodes.add(key_node)
                 value_node = get_global_node(child["value"])
                 if value_node is not None:
+                    if key_node and key_node.object.get("shortval"):
+                        value_node.object["shortval"] = key_node.object["shortval"]
                     child_nodes.add(value_node)
         elif object.get("items"):
             children = object.get("items")
@@ -122,12 +124,12 @@ for object in j:
         elif object.get("globals"):
             globals_node = get_global_node(object.get("globals"))
             child_nodes.add(globals_node)
-        elif object.get("locals"):
-            locals_node = get_global_node(object.get("locals"))
-            child_nodes.add(locals_node)
-        elif object.get("function"):
-            function_node = get_global_node(object.get("function"))
-            child_nodes.add(function_node)
+        # elif object.get("locals"):
+        #     locals_node = get_global_node(object.get("locals"))
+        #     child_nodes.add(locals_node)
+        # elif object.get("function"):
+        #     function_node = get_global_node(object.get("function"))
+        #     child_nodes.add(function_node)
 
         # missing:
         # closed list from closures
