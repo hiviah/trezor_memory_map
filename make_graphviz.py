@@ -48,6 +48,18 @@ class Node:
         else:
             return self.address
 
+    @property
+    def text_val(self):
+        obj = self.object
+        if obj.get("shortval"):
+            return obj["shortval"]
+        # elif obj.get("val"):  # do not use val currently, as it produces very long strings for display
+        #     return obj["val"]
+        elif obj.get("synthval"):  # synthetic value created by transfer to value from key in dict
+            return obj["synthval"]
+
+        return None
+
     @staticmethod
     def get_new_node_num():
         global node_idx
@@ -113,7 +125,7 @@ for object in j:
                 value_node = get_global_node(child["value"])
                 if value_node is not None:
                     if key_node and key_node.object.get("shortval"):
-                        value_node.object["shortval"] = key_node.object["shortval"]
+                        value_node.object["synthval"] = key_node.object["shortval"]
                     child_nodes.add(value_node)
         elif object.get("items"):
             children = object.get("items")
@@ -167,7 +179,7 @@ for idx, node in enumerate(some_nodes):
         URL=node.graph_id,
         label=node.object["type"]+" "+node.object["ptr"] + "\\n" + "%d chld" % len(node.children) +
             "\\n%d alloc" % node.object["alloc"] +
-              ("\\n%s" % node.object["shortval"] if node.object["shortval"] else ""),
+              ("\\n%s" % node.text_val if node.text_val else ""),
         fillcolor="%.3f 0.19 %.3f" % (max(0.529-math.log2(node.object["alloc"]+1)/20.0, 0),
             1-min(len(node.children)/50.0, 0.5))
        )
