@@ -6,8 +6,22 @@ import math
 
 from pygraphviz import AGraph
 
+import xdot
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
+
+
 # global counter for making keys for nil nodes
 node_idx = 0
+
+
+class GraphWindow(xdot.DotWindow):
+
+    def __init__(self):
+        xdot.DotWindow.__init__(self)
+        # self.widget.connect('clicked', self.on_url_clicked)
+        self.show_all()
 
 
 class Node:
@@ -199,3 +213,8 @@ for n in nodes:
     print(n.object["alloc"], n)
 
 print("Done, number of nodes: %d, number of edges: %d" % (dot_graph.number_of_nodes(), dot_graph.number_of_edges()))
+
+window = GraphWindow()
+window.connect('destroy', Gtk.main_quit)
+window.open_file("tjost.dot")
+Gtk.main()
