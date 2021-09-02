@@ -20,9 +20,17 @@ class GraphWindow(xdot.DotWindow):
 
     def __init__(self):
         xdot.DotWindow.__init__(self)
-        # self.widget.connect('clicked', self.on_url_clicked)
+        self.dotwidget.connect('clicked', self.on_url_clicked)
         self.show_all()
 
+    def on_url_clicked(self, widget, url, event):
+        dialog = Gtk.MessageDialog(
+            parent=self,
+            buttons=Gtk.ButtonsType.OK,
+            message_format="%s clicked" % url)
+        dialog.connect('response', lambda dialog, response: dialog.destroy())
+        dialog.run()
+        return True
 
 class Node:
 
