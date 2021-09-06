@@ -3,6 +3,7 @@
 import sys
 import json
 import math
+import pprint
 
 from pygraphviz import AGraph
 
@@ -21,15 +22,28 @@ class GraphWindow(xdot.DotWindow):
     def __init__(self):
         xdot.DotWindow.__init__(self)
         self.dotwidget.connect('clicked', self.on_url_clicked)
+
+        sw = Gtk.ScrolledWindow()
+        sw.height = 200
+        # print(self.vbox)
+        vbox = self.get_child()
+        self.object_view = Gtk.TextView()
+        self.text_buffer = self.object_view.get_buffer()
+        vbox.pack_start(sw, True, True, 0)
+        # vbox.pack_start(self.object_view, True, True, 0)
+        sw.add(self.object_view)
+        self.object_view.set_size_request(400, 400)
+
         self.show_all()
 
     def on_url_clicked(self, widget, url, event):
-        dialog = Gtk.MessageDialog(
-            parent=self,
-            buttons=Gtk.ButtonsType.OK,
-            message_format="%s clicked" % url)
-        dialog.connect('response', lambda dialog, response: dialog.destroy())
-        dialog.run()
+        # dialog = Gtk.MessageDialog(
+        #     parent=self,
+        #     buttons=Gtk.ButtonsType.OK,
+        #     message_format="%s clicked" % obj_map[url])
+        # dialog.connect('response', lambda dialog, response: dialog.destroy())
+        # dialog.run()
+        self.text_buffer.set_text(pprint.pformat(obj_map[url].object))
         return True
 
 class Node:
