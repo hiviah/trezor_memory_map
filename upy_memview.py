@@ -125,12 +125,12 @@ class GraphWindow(xdot.DotWindow):
 
         sw = Gtk.ScrolledWindow()
         self.object_view = Gtk.TextView()
+        self.object_view.set_editable(False)
         self.text_buffer = self.object_view.get_buffer()
+
         self.vpaned.add2(sw)
         sw.add(self.object_view)
         self.object_view.set_size_request(400, 400)
-        # self.object_view.set_default_size(200, 200)
-        # sw.set_default_size(200, 200)
 
         self.show_all()
 
