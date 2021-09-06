@@ -53,6 +53,7 @@ class GraphWindow(xdot.DotWindow):
         self.dotwidget = xdot.DotWidget()
         self.dotwidget.connect("error", lambda e, m: self.error_dialog(m))
         self.dotwidget.connect("history", self.on_history)
+        self.dotwidget.set_size_request(800, 400)
 
         # Create a UIManager instance
         uimanager = self.uimanager = Gtk.UIManager()
@@ -100,8 +101,11 @@ class GraphWindow(xdot.DotWindow):
         # Create a Toolbar
         toolbar = uimanager.get_widget('/ToolBar')
         self.vbox.pack_start(toolbar, False, False, 0)
+        # self.vbox.pack_start(self.dotwidget, True, True, 0)
+        self.vpaned = Gtk.VPaned()
+        self.vpaned.add1(self.dotwidget)
+        self.vbox.pack_start(self.vpaned, True, True, 0)
 
-        self.vbox.pack_start(self.dotwidget, True, True, 0)
 
         self.last_open_dir = "."
 
@@ -121,14 +125,15 @@ class GraphWindow(xdot.DotWindow):
 
         sw = Gtk.ScrolledWindow()
         sw.height = 200
-        # print(self.vbox)
         # vbox = self.get_child()
         self.object_view = Gtk.TextView()
         self.text_buffer = self.object_view.get_buffer()
-        self.vbox.pack_start(sw, True, True, 0)
-        # vbox.pack_start(self.object_view, True, True, 0)
+        # self.vbox.pack_start(sw, True, True, 0)
+        self.vpaned.add2(sw)
         sw.add(self.object_view)
         self.object_view.set_size_request(400, 400)
+        # self.object_view.set_default_size(200, 200)
+        # sw.set_default_size(200, 200)
 
         self.show_all()
 
