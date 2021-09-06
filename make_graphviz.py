@@ -19,17 +19,113 @@ node_idx = 0
 
 class GraphWindow(xdot.DotWindow):
 
+    ui = '''
+    <ui>
+        <toolbar name="ToolBar">
+            <toolitem action="Open"/>
+            <toolitem action="Reload"/>
+            <toolitem action="Print"/>
+            <separator/>
+            <toolitem action="Back"/>
+            <toolitem action="Forward"/>
+            <separator/>
+            <toolitem action="ZoomIn"/>
+            <toolitem action="ZoomOut"/>
+            <toolitem action="ZoomFit"/>
+            <toolitem action="Zoom100"/>
+            <separator/>
+            <toolitem name="Find" action="Find"/>
+        </toolbar>
+    </ui>
+    '''
+
     def __init__(self):
-        xdot.DotWindow.__init__(self)
+        Gtk.Window.__init__(self)
+        # xdot.DotWindow.__init__(self)  # we are stealing and modifying DotWindow init
+
+        window = self
+
+        window.set_title("uPy Memory Viewer")
+        window.set_default_size(800, 800)
+        self.vbox = Gtk.VBox()
+        window.add(self.vbox)
+
+        self.dotwidget = xdot.DotWidget()
+        self.dotwidget.connect("error", lambda e, m: self.error_dialog(m))
+        self.dotwidget.connect("history", self.on_history)
+
+        # Create a UIManager instance
+        uimanager = self.uimanager = Gtk.UIManager()
+
+        # Add the accelerator group to the toplevel window
+        accelgroup = uimanager.get_accel_group()
+        window.add_accel_group(accelgroup)
+
+        # Create an ActionGroup
+        actiongroup = Gtk.ActionGroup('Actions')
+        self.actiongroup = actiongroup
+
+        # Create actions
+        actiongroup.add_actions((
+            ('Open', Gtk.STOCK_OPEN, None, None, None, self.on_open),
+            ('Reload', Gtk.STOCK_REFRESH, None, None, None, self.on_reload),
+            ('Print', Gtk.STOCK_PRINT, None, None,
+             "Prints the currently visible part of the graph", self.dotwidget.on_print),
+            ('ZoomIn', Gtk.STOCK_ZOOM_IN, None, None, None, self.dotwidget.on_zoom_in),
+            ('ZoomOut', Gtk.STOCK_ZOOM_OUT, None, None, None, self.dotwidget.on_zoom_out),
+            ('ZoomFit', Gtk.STOCK_ZOOM_FIT, None, None, None, self.dotwidget.on_zoom_fit),
+            ('Zoom100', Gtk.STOCK_ZOOM_100, None, None, None, self.dotwidget.on_zoom_100),
+        ))
+
+        self.back_action = Gtk.Action('Back', None, None, Gtk.STOCK_GO_BACK)
+        self.back_action.set_sensitive(False)
+        self.back_action.connect("activate", self.dotwidget.on_go_back)
+        actiongroup.add_action(self.back_action)
+
+        self.forward_action = Gtk.Action('Forward', None, None, Gtk.STOCK_GO_FORWARD)
+        self.forward_action.set_sensitive(False)
+        self.forward_action.connect("activate", self.dotwidget.on_go_forward)
+        actiongroup.add_action(self.forward_action)
+
+        find_action = xdot.ui.window.FindMenuToolAction("Find", None,
+                                         "Find a node by name", None)
+        actiongroup.add_action(find_action)
+
+        # Add the actiongroup to the uimanager
+        uimanager.insert_action_group(actiongroup, 0)
+
+        # Add a UI descrption
+        uimanager.add_ui_from_string(self.ui)
+
+        # Create a Toolbar
+        toolbar = uimanager.get_widget('/ToolBar')
+        self.vbox.pack_start(toolbar, False, False, 0)
+
+        self.vbox.pack_start(self.dotwidget, True, True, 0)
+
+        self.last_open_dir = "."
+
+        self.set_focus(self.dotwidget)
+
+        # Add Find text search
+        find_toolitem = uimanager.get_widget('/ToolBar/Find')
+        self.textentry = Gtk.Entry(max_length=20)
+        self.textentry.set_icon_from_stock(0, Gtk.STOCK_FIND)
+        find_toolitem.add(self.textentry)
+
+        self.textentry.set_activates_default(True)
+        self.textentry.connect("activate", self.textentry_activate, self.textentry);
+        self.textentry.connect("changed", self.textentry_changed, self.textentry);
+
         self.dotwidget.connect('clicked', self.on_url_clicked)
 
         sw = Gtk.ScrolledWindow()
         sw.height = 200
         # print(self.vbox)
-        vbox = self.get_child()
+        # vbox = self.get_child()
         self.object_view = Gtk.TextView()
         self.text_buffer = self.object_view.get_buffer()
-        vbox.pack_start(sw, True, True, 0)
+        self.vbox.pack_start(sw, True, True, 0)
         # vbox.pack_start(self.object_view, True, True, 0)
         sw.add(self.object_view)
         self.object_view.set_size_request(400, 400)
