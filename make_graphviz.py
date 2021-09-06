@@ -124,11 +124,8 @@ class GraphWindow(xdot.DotWindow):
         self.dotwidget.connect('clicked', self.on_url_clicked)
 
         sw = Gtk.ScrolledWindow()
-        sw.height = 200
-        # vbox = self.get_child()
         self.object_view = Gtk.TextView()
         self.text_buffer = self.object_view.get_buffer()
-        # self.vbox.pack_start(sw, True, True, 0)
         self.vpaned.add2(sw)
         sw.add(self.object_view)
         self.object_view.set_size_request(400, 400)
