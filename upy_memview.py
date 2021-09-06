@@ -250,9 +250,9 @@ for object in j:
     addr = object.get("ptr", "(nil)")
     if addr != "(nil)":
         node = obj_map.get(addr)  # do not create again, lookup existing
-        children = object.get("children")  # need to do recursively?
+        children = object.get("children")  # TODO need to do recursively? seems not, each dict is captured toplevel
         child_nodes = set()
-        if children:
+        if children:  # dict
             for child in children:
                 key_node = get_global_node(child["key"])
                 if key_node is not None:
@@ -262,19 +262,25 @@ for object in j:
                     if key_node and key_node.object.get("shortval"):
                         value_node.object["synthval"] = key_node.object["shortval"]
                     child_nodes.add(value_node)
-        elif object.get("items"):
+        elif object.get("items"):  # list
             children = object.get("items")
             for child in children:
                 item_node = get_global_node(child)
                 if item_node is not None:
                     child_nodes.add(item_node)
-        elif object.get("globals"):
+        elif object.get("globals"):  # functions or closures
             globals_node = get_global_node(object.get("globals"))
             child_nodes.add(globals_node)
-        # elif object.get("locals"):
+        elif object.get("state"):  # generator
+            children = object.get("state")
+            for child in children:
+                item_node = get_global_node(child)
+                if item_node is not None:
+                    child_nodes.add(item_node)
+        # elif object.get("locals"):  # function/closure
         #     locals_node = get_global_node(object.get("locals"))
         #     child_nodes.add(locals_node)
-        # elif object.get("function"):
+        # elif object.get("function"):  # closure
         #     function_node = get_global_node(object.get("function"))
         #     child_nodes.add(function_node)
 
