@@ -341,6 +341,15 @@ for n in nodes:
 
 print("Done, number of nodes: %d, number of edges: %d" % (dot_graph.number_of_nodes(), dot_graph.number_of_edges()))
 
+module_nodes =[]
+for node in nodes:
+    children = [ch for ch in node.children if ch.object["type"] == "module"]
+    if len(children) > 0:
+        module_nodes.append([node, children])
+module_nodes.sort(key=lambda e: len(e[1]))
+for mn in module_nodes:
+    print(len(mn[1]), mn[0])
+
 window = GraphWindow()
 window.connect('destroy', Gtk.main_quit)
 window.open_file("tjost.dot")
